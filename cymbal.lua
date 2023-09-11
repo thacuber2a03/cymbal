@@ -1,5 +1,7 @@
 #!/usr/bin/env lua
 
+local debugger = require 'debugger'
+
 local reporter = require 'reporter'
 local lexer = require 'lexer'
 local parser = require 'parser'
@@ -22,11 +24,8 @@ do
 end
 
 reporter:setSource(source)
-
 lexer:init(source)
-parser:init(lexer:scan())
 if reporter:didError() then os.exit(-1) end
+parser:init(lexer:scan())
 local node = parser:parse()
 if reporter:didError() then os.exit(-1) end
-
-print(node)

@@ -10,6 +10,9 @@ local Token = Object:extend()
 ---@enum Token.Type
 Token.Type = {
 	NUMBER = "NUMBER",
+	STRING = "STRING",
+	CHARLIT = "CHARLIT",
+
 	PLUS = "PLUS",
 	MINUS = "MINUS",
 	STAR = "STAR",
@@ -32,7 +35,13 @@ end
 ---@return string
 function Token:__tostring()
 	local s = self.type
-	if self.value then s = s .. '(' .. self.value .. ')' end
+	if self.value then
+		if type(self.value) == "string" then
+			s = s .. '(' .. string.format("%q", self.value) .. ')'
+		else
+			s = s .. '(' .. tostring(self.value) .. ')'
+		end
+	end
 	return s
 end
 

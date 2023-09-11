@@ -3,6 +3,8 @@ local reporter = {
 	warnings = 0,
 }
 
+local function writeFmt(format, ...) io.write(string.format(format, ...)) end
+
 ---@param source string
 function reporter:setSource(source)
 	self.source = source
@@ -12,21 +14,15 @@ end
 ---@param startPos Position
 ---@param endPos Position
 function reporter:error(msg, startPos, endPos)
-	io.write("error: ", msg, " ")
-	io.write(string.format(
-		"[%i, %i]",
-		startPos.line, startPos.col
-	))
+	io.write("error ")
+	writeFmt("[%i, %i]", startPos.line, startPos.col)
 
 	if startPos.line ~= endPos.line
 	or startPos.col ~= endPos.col then
-		io.write(string.format(
-			" - [%i, %i]",
-			endPos.line, endPos.col
-		))
+		writeFmt("-[%i, %i]", endPos.line, endPos.col)
 	end
 
-	io.write "\n"
+	writeFmt(": %s\n", msg)
 
 	reporter:printLocText(startPos, endPos)
 
@@ -36,15 +32,16 @@ end
 ---@param msg string
 ---@param startPos Position
 ---@param endPos Position
-function reporter:warning(msg, startPos, endPos)
-	io.write("warning: ", msg, "\n")
-	io.write(string.format(
-		"[%i, %i]-[%i, %i]\n",
-		startPos.line, startPos.col,
-		endPos.line, endPos.col
-	))
+function reporter:warn(msg, startPos, endPos)
+	io.write("warn ")
+	writeFmt("[%i, %i]", startPos.line, startPos.col)
 
-	io.write "\n"
+	if startPos.line ~= endPos.line
+	or startPos.col ~= endPos.col then
+		writeFmt("-[%i, %i]", endPos.line, endPos.col)
+	end
+
+	writeFmt(": %s\n", msg)
 
 	reporter:printLocText(startPos, endPos)
 
@@ -55,39 +52,47 @@ end
 ---@nodiscard
 function reporter:didError() return self.errors > 0 end
 
+local PREFIX = "|"
+local MULTI_PREFIX = "->"
+local LINE_NUM_LEN = 4
+
+---@private
 function reporter:printLocText(startPos, endPos)
-	io.write "|\n"
+	writeFmt("%s\n", PREFIX)
 
 	local lines = {}
-	for m in self.source:gmatch "[^%s]*" do
+	for m in self.source:gmatch "[^\n]*" do
 		table.insert(lines, m)
 	end
 
 	if startPos.line == endPos.line then
-		io.write("|\t", lines[startPos.line], "\n")
+		writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line, lines[startPos.line])
 		local s = string.rep(" ", startPos.col-1)
 		s = s .. string.rep("^", math.max(1, endPos.col - startPos.col))
-		io.write("|\t", s, "\n")
-		io.write "|\n"
-		return
-	end
+		writeFmt("%s\t%s\n", PREFIX, s)
+	else
+		local chosenLines = { table.unpack(lines, startPos.line, endPos.line) }
+		chosenLines[1] = chosenLines[1]:sub(startPos.col)
+		chosenLines[#chosenLines] = chosenLines[#chosenLines]:sub(1, endPos.col)
 
-	local chosenLines = { table.unpack(lines, startPos.line, endPos.line) }
-	chosenLines[1] = chosenLines[1]:sub(startPos.col)
-	chosenLines[#chosenLines] = chosenLines[#chosenLines]:sub(1, endPos.col)
+		for i, t in ipairs(chosenLines) do
+			writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line + i, t)
 
-	for i, t in ipairs(chosenLines) do
-		io.write("|\t", t, "\n")
-
-		local s = ""
-		if i == 1 then
-			s = string.rep(" ", startPos.col)
-			s = s .. string.rep("^", #t - startPos.col)
-			io.write("|\t", s, "\n")
+			---@type string
+			local s
+			if i == 1 then
+				s = string.rep(" ", startPos.col-1)
+				s = s .. "^" .. string.rep("-", #t - startPos.col)
+			elseif i == #chosenLines then
+				s = string.rep("-", endPos.col-1) .. "^"
+			else
+				s = string.rep("-", #t)
+			end
+			writeFmt("%s\t%s\n", MULTI_PREFIX, s)
 		end
-	end
+	end -- startPos.line == endPos.line
 
-	io.write "|\n"
+	writeFmt("%s\n", PREFIX)
 end
 
 return reporter

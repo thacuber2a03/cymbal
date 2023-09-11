@@ -49,4 +49,16 @@ function ast.Number(value, short, startPos, endPos)
 	return n
 end
 
+---@class String : ASTNode
+---@field public chars string
+
+---@param chars string
+---@param startPos Position
+---@param endPos Position
+function ast.String(chars, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	n.chars = chars
+	return n
+end
+
 return ast

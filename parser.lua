@@ -1,5 +1,7 @@
-local Type = require 'token'.Type
+local reporter = require 'reporter'
 local ast = require 'ast'
+local Token = require 'token'
+local Type = Token.Type
 
 ---@class Parser
 ---@field private tokens Token[]
@@ -57,16 +59,18 @@ function parser:consume(type, msg)
 end
 
 ---@param msg string
----@param node ASTNode
-function parser:error(msg, node)
-	reporter:error(msg, node.startPos, node.endPos)
-end
+---@param elem ASTNode|Token
+function parser:error(msg, elem) reporter:error(msg, elem.startPos, elem.endPos) end
+
+---@param msg string
+---@param elem ASTNode|Token
+function parser:warn(msg, elem) reporter:error(msg, elem.startPos, elem.endPos) end
 
 ---@return ASTNode
 ---@nodiscard
 function parser:parse()
 	local program = self:expression()
-	if not self:atEnd() then error "expected end of file" end
+	if not self:atEnd() then self:error("expected end of file", self.curToken) end
 	return program
 end
 
@@ -94,7 +98,7 @@ function parser:expression() return self:binary("term",   { Type.PLUS, Type.MINU
 ---@nodiscard
 function parser:term()       return self:binary("factor", { Type.STAR, Type.SLASH }) end
 
----@return Number
+---@return Number|String
 ---@nodiscard
 function parser:factor()
 	if self:check(Type.NUMBER) then
@@ -102,15 +106,21 @@ function parser:factor()
 		local short = false
 
 		if num.value > 0xffff then
-			self:warning "integer literal out of range; clamping"
+			self:warn("integer literal out of range; clamping", num)
 			num.value = num.value & 0xffff
 		end
 
 		if num.value > 0xff then short = true end
 
-		return ast.Number(num.value, short)
+		return ast.Number(num.value, short, num.startPos, num.endPos)
+	elseif self:check(Type.STRING) then
+		local str = self:advance()
+		return ast.String(str.value, str.startPos, str.endPos)
+	elseif self:check(Type.CHARLIT) then
+		local char = self:advance()
+		return ast.Number(char.value, false, char.startPos, char.endPos)
 	else
-		self:error("unexpected token "..tostring(self.curToken))
+		self:error("unexpected token", self.curToken)
 	end
 end
 
