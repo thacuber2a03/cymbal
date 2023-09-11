@@ -25,7 +25,7 @@ function Position:advance(curChar)
 end
 
 function Position:copy()
-
+	return Position(self.char, self.line, self.col)
 end
 
 return Position
