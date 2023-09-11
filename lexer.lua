@@ -27,7 +27,7 @@ function lexer:advance()
 	assert(self.didInit, "lexer not yet initialized")
 
 	local oldChar = self.curChar
-	self.pos:advance()
+	self.pos:advance(oldChar)
 	if self.pos.char <= #self.source then
 		self.curChar = self.source:sub(self.pos.char, self.pos.char)
 	else
