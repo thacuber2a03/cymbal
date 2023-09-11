@@ -1,4 +1,3 @@
----@diagnostic disable-next-line: unused-local
 local reporter = require 'reporter'
 local Position = require 'position'
 local Token = require 'token'
@@ -63,14 +62,14 @@ function lexer:scan()
 			table.insert(self.tokens, Token(type, self.curChar, here, here))
 			self:advance()
 		else
-			io.write("unknown character '", self.curChar, "'\n")
+			local here = self.pos:copy()
+			reporter:error("unknown character '"..self.curChar.."'", here, here)
 			self:advance()
 		end
 	end
 
 	local here = self.pos:copy()
 	table.insert(self.tokens, Token(Type.EOF, nil, here, here))
-	self:init(self.source)
 	return self.tokens
 end
 

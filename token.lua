@@ -18,6 +18,10 @@ Token.Type = {
 	EOF = "EOF",
 }
 
+---@param type Token.Type
+---@param value any
+---@param startPos Position
+---@param endPos Position
 function Token:new(type, value, startPos, endPos)
 	self.type = type
 	self.value = value
@@ -25,6 +29,7 @@ function Token:new(type, value, startPos, endPos)
 	self.endPos = endPos
 end
 
+---@return string
 function Token:__tostring()
 	local s = self.type
 	if self.value then s = s .. '(' .. self.value .. ')' end

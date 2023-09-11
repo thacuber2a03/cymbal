@@ -1,5 +1,6 @@
 #!/usr/bin/env lua
 
+local reporter = require 'reporter'
 local lexer = require 'lexer'
 local parser = require 'parser'
 
@@ -20,6 +21,12 @@ do
 	source = inputfile:read "*a"
 end
 
+reporter:setSource(source)
+
 lexer:init(source)
 parser:init(lexer:scan())
-print(parser:parse())
+if reporter:didError() then os.exit(-1) end
+local node = parser:parse()
+if reporter:didError() then os.exit(-1) end
+
+print(node)
