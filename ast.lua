@@ -26,8 +26,8 @@ end
 ---@param right Token|Binary
 ---@return Binary
 function ast.Binary(left, op, right, startPos, endPos)
-	---@type Binary
 	local n = newNode(startPos, endPos)
+	---@cast n Binary
 	n.type = "Binary"
 	n.left = left
 	n.op = op
@@ -41,9 +41,11 @@ end
 
 ---@param value integer
 ---@param short boolean
+---@return Number
 function ast.Number(value, short, startPos, endPos)
-	---@type Number
 	local n = newNode(startPos, endPos)
+	---@cast n Number
+	n.type = "Number"
 	n.value = value
 	n.short = short
 	return n
@@ -57,6 +59,8 @@ end
 ---@param endPos Position
 function ast.String(chars, startPos, endPos)
 	local n = newNode(startPos, endPos)
+	---@cast n String
+	n.type = "String"
 	n.chars = chars
 	return n
 end
