@@ -23,12 +23,7 @@ function Position:advance(curChar)
 	end
 end
 
-function Position:copy()
-	return Position(self.char, self.line, self.col)
-end
-
-function Position:__tostring()
-	return string.format("(%i, %i)", self.line, self.col)
-end
+function Position:copy() return Position(self.char, self.line, self.col) end
+function Position:__tostring() return string.format("(%i, %i)", self.line, self.col) end
 
 return Position
