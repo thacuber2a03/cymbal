@@ -52,7 +52,11 @@ function parser:consume(type, msg)
 end
 
 ---@return Binary
-function parser:parse() return self:expression() end
+function parser:parse()
+	local program = self:expression()
+	if not self:check(Type.EOF) then error "expected end of file" end
+	return program
+end
 
 function parser:binary(method, tokTypes)
 	local left = self[method](self)
