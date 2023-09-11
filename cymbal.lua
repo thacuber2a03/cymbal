@@ -3,10 +3,6 @@
 local lexer = require 'lexer'
 local parser = require 'parser'
 
--- ride
--- an expression-based programming language
--- that compiles to Uxn machine code
-
 if #arg ~= 2 then
 	io.write("usage: ", arg[0], " <input file> <output file>")
 	os.exit(-1)
