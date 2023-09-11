@@ -21,6 +21,36 @@ function parser:advance()
 	return oldToken
 end
 
+---@param type Token.Type
+---@return boolean doesMatch
+---@private
+---@nodiscard
+function parser:check(type) return self.curToken.type == type end
+
+---`parser:check(type)` but with side effects
+---@param type Token.Type
+---@return boolean doesMatch
+---@private
+---@nodiscard
+function parser:match(type)
+	if self:check(type) then
+		self:advance()
+		return true
+	end
+	return false
+end
+
+---@param type Token.Type
+---@param msg string
+---@return Token
+function parser:consume(type, msg)
+	if self:check(type) then
+		return self:advance()
+	else
+		error(msg)
+	end
+end
+
 ---@return Binary
 function parser:parse() return self:expression() end
 
@@ -28,8 +58,8 @@ function parser:binary(method, tokTypes)
 	local left = self[method](self)
 
 	for _, v in ipairs(tokTypes) do
-		if self.curToken == v then
-			local op = self:advance()
+		if self.curToken.type == v then
+			local op = self:consume(v, "what")
 			local right = self[method](self)
 			left = ast.Binary(left, op, right)
 		end
@@ -43,7 +73,9 @@ function parser:term()       return self:binary("factor", { Type.STAR, Type.SLAS
 
 function parser:factor()
 	if self:check(Type.NUMBER) then
-		return node.Literal(self:advance())
+		return ast.Literal(self:advance())
+	else
+		error("unexpected token "..tostring(self.curToken))
 	end
 end
 

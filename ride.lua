@@ -1,6 +1,7 @@
 #!/usr/bin/env lua
 
 local lexer = require 'lexer'
+local parser = require 'parser'
 
 -- ride
 -- an expression-based programming language
@@ -24,5 +25,5 @@ do
 end
 
 lexer:init(source)
-local tokens = lexer:scan()
-for _, t in ipairs(tokens) do print(t) end
+parser:init(lexer:scan())
+print(parser:parse())
