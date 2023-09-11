@@ -18,14 +18,10 @@ function lexer:init(source)
 	self.source = source
 	self.pos = Position()
 	self.curChar = self.source:sub(1,1)
-
-	self.didInit = true
 end
 
 ---@return string? oldChar
 function lexer:advance()
-	assert(self.didInit, "lexer not yet initialized")
-
 	local oldChar = self.curChar
 	self.pos:advance(oldChar)
 	if self.pos.char <= #self.source then
