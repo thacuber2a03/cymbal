@@ -18,6 +18,7 @@ function lexer:init(source)
 	self.source = source
 	self.pos = Position()
 	self.curChar = self.source:sub(1,1)
+	self.tokens = {}
 end
 
 ---@return string? oldChar
@@ -47,8 +48,6 @@ end
 
 ---@return Token[]
 function lexer:scan()
-	local tokens = {}
-
 	while self.curChar do
 		while self.curChar and self.curChar:match "%s" do
 			self:advance()
@@ -57,11 +56,11 @@ function lexer:scan()
 		if not self.curChar then break end
 
 		if self.curChar:match "%d" then
-			tokens[#tokens+1] = self:number()
+			table.insert(self.tokens, self:number())
 		elseif oneCharToks[self.curChar] then
 			local type = oneCharToks[self.curChar]
 			local here = self.pos:copy()
-			tokens[#tokens+1] = Token(type, self.curChar, here, here)
+			table.insert(self.tokens, Token(type, self.curChar, here, here))
 			self:advance()
 		else
 			io.write("unknown character '", self.curChar, "'\n")
@@ -70,9 +69,9 @@ function lexer:scan()
 	end
 
 	local here = self.pos:copy()
-	tokens[#tokens+1] = Token(Type.EOF, nil, here, here)
+	table.insert(self.tokens, Token(Type.EOF, nil, here, here))
 	self:init(self.source)
-	return tokens
+	return self.tokens
 end
 
 return lexer
