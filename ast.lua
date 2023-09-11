@@ -13,33 +13,21 @@ local ast = {}
 ---@param right Token|Binary
 ---@return Binary
 function ast.Binary(left, op, right)
-	return setmetatable({
+	return {
 		type = "Binary",
 		left = left,
 		op = op,
 		right = right,
-	}, {
-		__tostring = function(self)
-			local s = "Binary("
-			s = s .. tostring(self.left) .. ", "
-			s = s .. tostring(self.op) .. ", "
-			s = s .. tostring(self.right)
-			return s .. ")"
-		end
-	})
+	}
 end
 
 ---@class Literal: ASTNode
 ---@field public value any
 function ast.Literal(value)
-	return setmetatable({
+	return {
 		type = "Literal",
 		value = value
-	}, {
-		__tostring = function(self)
-			return "Literal(" .. tostring(self.value) .. ")"
-		end
-	})
+	}
 end
 
 return ast
