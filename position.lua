@@ -1,11 +1,10 @@
 local Object = require 'lib.classic'
 
-local Position = Object:extend()
-
 ---@class Position
 ---@field public char integer
 ---@field public line integer
 ---@field public col integer
+local Position = Object:extend()
 
 function Position:new(char, line, col)
 	self.char = char or 1
