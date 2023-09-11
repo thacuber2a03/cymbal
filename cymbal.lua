@@ -1,7 +1,5 @@
 #!/usr/bin/env lua
 
-local debugger = require 'debugger'
-
 local reporter = require 'reporter'
 local lexer = require 'lexer'
 local parser = require 'parser'
