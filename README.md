@@ -1,3 +1,3 @@
 # Ride
 
-a programming language that compiles to Uxn machine code
+an expression-based programming language that compiles to Uxn machine code
