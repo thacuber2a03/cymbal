@@ -30,7 +30,7 @@ end
 
 ---@param node Binary
 function compiler:visitBinary(node)
-
+	error "todo"
 end
 
 ---@param node Number
