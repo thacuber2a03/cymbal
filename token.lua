@@ -14,6 +14,8 @@ Token.Type = {
 	MINUS = "MINUS",
 	STAR = "STAR",
 	SLASH = "SLASH",
+
+	EOF = "EOF",
 }
 
 function Token:new(type, value, startPos, endPos)

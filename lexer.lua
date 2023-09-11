@@ -73,6 +73,8 @@ function lexer:scan()
 		end
 	end
 
+	local here = self.pos:copy()
+	tokens[#tokens+1] = Token(Type.EOF, nil, here, here)
 	self:init(self.source)
 	return tokens
 end
