@@ -23,6 +23,6 @@ do
 	source = inputfile:read "*a"
 end
 
-lexer:init()
-local tokens = lexer:scan(source)
+lexer:init(source)
+local tokens = lexer:scan()
 for _, t in ipairs(tokens) do print(t) end

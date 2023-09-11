@@ -13,15 +13,16 @@ local oneCharToks = {
 	['/'] = Type.SLASH,
 }
 
-function lexer:init()
-	self.source = nil
+---@param source string
+function lexer:init(source)
+	self.source = source
 	self.pos = Position()
-	self.curChar = nil
+	self.curChar = self.source:sub(1,1)
 
 	self.didInit = true
 end
 
----@return string? # the character before
+---@return string? oldChar
 function lexer:advance()
 	assert(self.didInit, "lexer not yet initialized")
 
@@ -48,11 +49,8 @@ function lexer:number()
 	return Token(Type.NUMBER, tonumber(num), start, self.pos:copy())
 end
 
----@param source string
 ---@return Token[]
-function lexer:scan(source)
-	self.source = source
-	self:advance()
+function lexer:scan()
 	local tokens = {}
 
 	while self.curChar do
@@ -75,7 +73,7 @@ function lexer:scan(source)
 		end
 	end
 
-	self:init()
+	self:init(self.source)
 	return tokens
 end
 
