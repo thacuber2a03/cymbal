@@ -8,9 +8,9 @@ local Position = Object:extend()
 ---@field public col integer
 
 function Position:new(char, line, col)
-	self.char = char or 0
+	self.char = char or 1
 	self.line = line or 1
-	self.col = col or 0
+	self.col = col or 1
 end
 
 function Position:advance(curChar)
