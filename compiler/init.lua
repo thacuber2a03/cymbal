@@ -24,13 +24,34 @@ end
 
 ---@param node ASTNode
 ---@return string
-function compiler:visit(node)
-	return self["visit" .. node.type](self, node)
+function compiler:visit(node, ...)
+	local method = self["visit" .. node.type]
+	assert(method, "fatal: no visit method for " .. node.type .. " node")
+	return method(self, node, ...)
 end
 
 function compiler:compile()
 	self:visit(self.ast)
 	return self.code
+end
+
+---@param node Unary
+function compiler:visitUnary(node)
+	local op = node.op.type
+	if op == Type.MINUS then
+		self:emitByte(Opcode.LIT)
+		self:emitByte(00)
+	end
+
+	self:visit(node.value)
+
+	if op == Type.BANG then
+		self:emitByte(Opcode.LIT)
+		self:emitByte(00)
+		self:emitByte(Opcode.EQU)
+	elseif op == Type.MINUS then
+		self:emitByte(Opcode.SUB)
+	end
 end
 
 ---@param node Binary

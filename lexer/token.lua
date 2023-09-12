@@ -17,6 +17,7 @@ Token.Type = {
 	MINUS = "MINUS",
 	STAR = "STAR",
 	SLASH = "SLASH",
+	BANG = "BANG",
 
 	EOF = "EOF",
 }

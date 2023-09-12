@@ -77,9 +77,11 @@ function parser:parse()
 	return program
 end
 
----@return Binary
+---@return ASTNode | Binary
 ---@nodiscard
+---@private
 function parser:binary(method, tokTypes)
+	---@type ASTNode
 	local left = self[method](self)
 
 	while true do
@@ -88,8 +90,10 @@ function parser:binary(method, tokTypes)
 			if self:check(v) then
 				match = true
 				local op = self:advance()
+				---@type ASTNode
 				local right = self[method](self)
-				left = ast.Binary(left, op, right)
+				left = ast.Binary(left, op, right, left.startPos, right.endPos)
+				---@cast left Binary
 			end
 		end
 
@@ -99,17 +103,27 @@ function parser:binary(method, tokTypes)
 	return left
 end
 
----@return Binary
+---@return ASTNode | Binary
 ---@nodiscard
 ---@private
 function parser:expression() return self:binary("term",   { Type.PLUS, Type.MINUS }) end
 
----@return Binary
+---@return ASTNode | Binary
 ---@nodiscard
 ---@private
-function parser:term()       return self:binary("factor", { Type.STAR, Type.SLASH }) end
+function parser:term()       return self:binary("primary", { Type.STAR, Type.SLASH }) end
 
----@return Number | String | Error
+function parser:primary()
+	if not (self:check(Type.MINUS) or self:check(Type.BANG)) then
+		return self:factor()
+	end
+
+	local op = self:advance()
+	local primary = self:primary()
+	return ast.Unary(op, primary, op.startPos, primary.endPos)
+end
+
+---@return Number | Error
 ---@nodiscard
 ---@private
 function parser:factor()
@@ -125,10 +139,6 @@ function parser:factor()
 		if num.value > 0xff then short = true end
 
 		return ast.Number(num.value, short, num.startPos, num.endPos)
-
-	elseif self:check(Type.STRING) then
-		local str = self:advance()
-		return ast.String(str.value, str.startPos, str.endPos)
 
 	elseif self:check(Type.CHARLIT) then
 		local char = self:advance()

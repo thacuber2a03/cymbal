@@ -20,6 +20,13 @@ local oneCharToks = {
 	['/'] = Type.SLASH,
 }
 
+local twoCharToks = {
+	["!"] = {
+		["="] = false, -- TODO(thacuber2a03): comparison and equality
+		[false] = Type.BANG,
+	},
+}
+
 ---@param source string
 function lexer:init(source)
 	self.source = source
@@ -46,6 +53,8 @@ function lexer:error(msg)
 	reporter:error(msg, start or self.pos:copy(), self.pos:copy())
 end
 
+---@param type Token.Type
+---@param value any
 function lexer:token(type, value)
 	local start = self:getStart()
 	self:popStart()
@@ -77,7 +86,7 @@ end
 function lexer:parseEscape()
 	self:pushStart()
 	self:advance()
-	if self:atEnd() then self:error("expected escape sequence after '\\'") end
+	if self:atEnd() then self:error "expected escape sequence after '\\'" end
 	local c = self:advance()
 
 	---@type string
@@ -95,12 +104,12 @@ function lexer:parseEscape()
 			if not self:atEnd() and self.curChar:match(hexDigitPattern) then
 				hex = hex .. self:advance()
 			else
-				self:error("expected hex digit")
+				self:error "expected hex digit"
 			end
 		end
 		e = string.char(tonumber(hex, 16) --[[@as integer]])
 	else
-		self:error("unknown escape sequence")
+		self:error "unknown escape sequence"
 		e = ""
 	end
 
@@ -139,7 +148,7 @@ function lexer:string(quote)
 	local raw = quote == '`'
 
 	local function missingEndQuote()
-		self:error("missing end quote (did you intend to make a `raw string`?)")
+		self:error "missing end quote (did you intend to make a `raw string`?)"
 	end
 
 	self:advance()
@@ -196,7 +205,7 @@ function lexer:number()
 	if base == 2 and num:find "[2-9a-fA-F]" then
 		local dig = "decimal"
 		if num:find "[a-fA-F]" then dig = "hexadecimal" end
-		self:error(dig.." digit(s) on binary literal")
+			self:error(dig.." digit(s) on binary literal")
 		return
 	end
 
@@ -220,10 +229,19 @@ function lexer:scan()
 		    or self.curChar == '`' then
 			self:string(self.curChar)
 
+		elseif twoCharToks[self.curChar] then
+			local possibleTypes = twoCharToks[self.curChar]
+			self:advance()
+			local possibleType = possibleTypes[self.curChar]
+			if possibleType then
+				self:advance()
+				self:token(possibleType)
+			else
+				self:token(possibleTypes[false])
+			end
+
 		elseif oneCharToks[self.curChar] then
-			local type = oneCharToks[self.curChar]
-			local here = self.pos:copy()
-			table.insert(self.tokens, Token(type, self.curChar, here, here))
+			self:token(oneCharToks[self.curChar])
 			self:advance()
 		else
 			self:error("unknown character '"..self.curChar.."'")
