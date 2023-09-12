@@ -101,14 +101,17 @@ end
 
 ---@return Binary
 ---@nodiscard
+---@private
 function parser:expression() return self:binary("term",   { Type.PLUS, Type.MINUS }) end
 
 ---@return Binary
 ---@nodiscard
+---@private
 function parser:term()       return self:binary("factor", { Type.STAR, Type.SLASH }) end
 
----@return Number|String
+---@return Number | String | Error
 ---@nodiscard
+---@private
 function parser:factor()
 	if self:check(Type.NUMBER) then
 		local num = self:advance()
