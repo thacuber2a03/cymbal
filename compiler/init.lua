@@ -11,9 +11,15 @@ function compiler:init(ast)
 	self.short = false
 end
 
----@param b number
+---@param b integer
 function compiler:emitByte(b)
 	table.insert(self.code, b & 0xff)
+end
+
+---@param a, b integer
+function compiler:emitBytes(a, b)
+	self:emitByte(a)
+	self:emitByte(b)
 end
 
 ---@param s number
@@ -32,22 +38,19 @@ end
 
 function compiler:compile()
 	self:visit(self.ast)
+	self.short = false
 	return self.code
 end
 
 ---@param node Unary
 function compiler:visitUnary(node)
 	local op = node.op.type
-	if op == Type.MINUS then
-		self:emitByte(Opcode.LIT)
-		self:emitByte(00)
-	end
+	if op == Type.MINUS then self:emitBytes(Opcode.LIT, 00) end
 
 	self:visit(node.value)
 
 	if op == Type.BANG then
-		self:emitByte(Opcode.LIT)
-		self:emitByte(00)
+		self:emitBytes(Opcode.LIT, 00)
 		self:emitByte(Opcode.EQU)
 	elseif op == Type.MINUS then
 		self:emitByte(Opcode.SUB)
@@ -90,7 +93,7 @@ function compiler:visitNumber(node)
 end
 
 ---@param node String
-function compiler:visitString(node)
+function compiler:visitString(node) ---@diagnostic disable-line: unused-local
 	error "todo"
 end
 
