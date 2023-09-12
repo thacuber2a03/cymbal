@@ -64,7 +64,7 @@ function parser:error(msg, elem) reporter:error(msg, elem.startPos, elem.endPos)
 
 ---@param msg string
 ---@param elem ASTNode|Token
-function parser:warn(msg, elem) reporter:error(msg, elem.startPos, elem.endPos) end
+function parser:warn(msg, elem) reporter:warn(msg, elem.startPos, elem.endPos) end
 
 ---@return ASTNode
 ---@nodiscard
@@ -79,12 +79,18 @@ end
 function parser:binary(method, tokTypes)
 	local left = self[method](self)
 
-	for _, v in ipairs(tokTypes) do
-		if self:check(v) then
-			local op = self:advance()
-			local right = self[method](self)
-			left = ast.Binary(left, op, right)
+	while true do
+		local match = false
+		for _, v in ipairs(tokTypes) do
+			if self:check(v) then
+				match = true
+				local op = self:advance()
+				local right = self[method](self)
+				left = ast.Binary(left, op, right)
+			end
 		end
+
+		if not match then break end
 	end
 
 	return left
@@ -113,12 +119,15 @@ function parser:factor()
 		if num.value > 0xff then short = true end
 
 		return ast.Number(num.value, short, num.startPos, num.endPos)
+
 	elseif self:check(Type.STRING) then
 		local str = self:advance()
 		return ast.String(str.value, str.startPos, str.endPos)
+
 	elseif self:check(Type.CHARLIT) then
 		local char = self:advance()
 		return ast.Number(char.value, false, char.startPos, char.endPos)
+
 	else
 		self:error("unexpected token", self.curToken)
 	end
