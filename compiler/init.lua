@@ -80,15 +80,14 @@ end
 ---@param node Number
 function compiler:visitNumber(node)
 	-- TODO(thacuber2a03): either somehow predict if
-	-- the whole expression will be shorts only,
+	-- the whole expression will have any shorts,
 	-- or only compile shorts
 	if node.short then
 		self.short = true
 		self:emitByte(Opcode.LIT2)
 		self:emitShort(node.value)
 	else
-		self:emitByte(Opcode.LIT)
-		self:emitByte(node.value)
+		self:emitBytes(Opcode.LIT, node.value)
 	end
 end
 
