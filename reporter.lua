@@ -53,7 +53,7 @@ end
 function reporter:didError() return self.errors > 0 end
 
 local PREFIX = "|"
-local MULTI_PREFIX = "->"
+local MULTI_PREFIX = "..."
 local LINE_NUM_LEN = 4
 
 ---@private
