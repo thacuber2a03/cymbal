@@ -1,4 +1,6 @@
-## grammar (not done)
+## grammar
+
+**NOTE**: work in progress.
 
 | nonterminal | production                            |
 | :---------- | :------------------------------------ |
