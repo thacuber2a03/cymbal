@@ -91,8 +91,11 @@ function lexer:parseEscape()
 		-- hex char, \x0a == \n
 		local hex = ""
 		for _=1, 2 do
-			if self:atEnd() then self:error("expected hex digit") end
-			hex = hex .. self:advance()
+			if not self:atEnd() and self.curChar:match(hexDigitPattern) then
+				hex = hex .. self:advance()
+			else
+				self:error("expected hex digit")
+			end
 		end
 		e = string.char(tonumber(hex, 16) --[[@as integer]])
 	else
