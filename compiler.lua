@@ -18,8 +18,8 @@ end
 
 ---@param s number
 function compiler:emitShort(s)
+	table.insert(self.code, (s >> 8) & 0xff)
 	table.insert(self.code,  s       & 0xff)
-	table.insert(self.code, (s << 4) & 0xff)
 end
 
 ---@param node ASTNode
@@ -55,6 +55,9 @@ end
 
 ---@param node Number
 function compiler:visitNumber(node)
+	-- TODO(thacuber2a03): either somehow predict if
+	-- the whole expression will be shorts only,
+	-- or only compile shorts
 	if node.short then
 		self.short = true
 		self:emitByte(Opcode.LIT2)
