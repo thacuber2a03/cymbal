@@ -1,6 +1,6 @@
-local Opcode = require 'ops'.Opcode
-local Mode = require 'ops'.Mode
-local Type = require 'token'.Type
+local ops = require 'compiler.ops'
+local Opcode, Mode = ops.Opcode, ops.Mode
+local Type = require 'lexer.token'.Type
 
 local compiler = {}
 

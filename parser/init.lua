@@ -1,6 +1,6 @@
 local reporter = require 'reporter'
-local ast = require 'ast'
-local Token = require 'token'
+local ast = require 'parser.ast'
+local Token = require 'lexer.token'
 local Type = Token.Type
 
 ---@class Parser

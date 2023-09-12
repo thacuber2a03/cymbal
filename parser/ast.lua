@@ -24,6 +24,8 @@ end
 ---@param left ASTNode
 ---@param op Token
 ---@param right ASTNode
+---@param startPos Position
+---@param endPos Position
 ---@return Binary
 function ast.Binary(left, op, right, startPos, endPos)
 	local n = newNode(startPos, endPos)

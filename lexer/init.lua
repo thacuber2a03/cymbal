@@ -1,6 +1,6 @@
 local reporter = require 'reporter'
-local Position = require 'position'
-local Token = require 'token'
+local Position = require 'lexer.position'
+local Token = require 'lexer.token'
 local Type = Token.Type
 
 local hexDigitPattern = "[0-9a-fA-F]"
