@@ -16,7 +16,8 @@ function compiler:emitByte(b)
 	table.insert(self.code, b & 0xff)
 end
 
----@param a, b integer
+---@param a integer
+---@param b integer
 function compiler:emitBytes(a, b)
 	self:emitByte(a)
 	self:emitByte(b)
@@ -80,8 +81,8 @@ end
 ---@param node Number
 function compiler:visitNumber(node)
 	-- TODO(thacuber2a03): either somehow predict if
-	-- the whole expression will have any shorts,
-	-- or only compile shorts
+	-- the whole expression will have any shorts, or
+	-- only compile as shorts
 	if node.short then
 		self.short = true
 		self:emitByte(Opcode.LIT2)
