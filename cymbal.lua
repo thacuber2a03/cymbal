@@ -24,14 +24,24 @@ do
 	source = inputfile:read "*a"
 end
 
+local function endIfError()
+	if reporter:didError() then
+		io.write("errors found; must fix to compile")
+		os.exit(-1)
+	end
+end
+
 reporter:setSource(source)
 lexer:init(source)
-if reporter:didError() then os.exit(-1) end
+local start = os.clock()
 parser:init(lexer:scan())
-local ast = parser:parse()
-if reporter:didError() then os.exit(-1) end
-compiler:init(ast)
+compiler:init(parser:parse())
 local result = compiler:compile()
+local finish = os.clock()
+io.write(string.format(
+	"finished compilation in %ims",
+	math.floor((finish - start) * 1e6)
+))
 
 do
 	local outputfile <close>, err = io.open(outputfname, "w+b")
