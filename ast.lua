@@ -17,13 +17,13 @@ local function newNode(startPos, endPos)
 end
 
 ---@class Binary : ASTNode
----@field public left Binary
+---@field public left ASTNode
 ---@field public op Token
----@field public right Binary
+---@field public right ASTNode
 
----@param left Literal|Binary
+---@param left ASTNode
 ---@param op Token
----@param right Binary
+---@param right ASTNode
 ---@return Binary
 function ast.Binary(left, op, right, startPos, endPos)
 	local n = newNode(startPos, endPos)
@@ -35,6 +35,7 @@ function ast.Binary(left, op, right, startPos, endPos)
 	return n
 end
 
+---Represents all constants in the code.
 ---@class Literal : ASTNode
 
 ---@class Number : Literal
