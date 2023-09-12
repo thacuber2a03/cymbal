@@ -60,7 +60,10 @@ end
 
 ---@param msg string
 ---@param elem ASTNode|Token
-function parser:error(msg, elem) reporter:error(msg, elem.startPos, elem.endPos) end
+function parser:error(msg, elem)
+	reporter:error(msg, elem.startPos, elem.endPos)
+	return ast.Error(elem.startPos, elem.endPos)
+end
 
 ---@param msg string
 ---@param elem ASTNode|Token
@@ -129,7 +132,7 @@ function parser:factor()
 		return ast.Number(char.value, false, char.startPos, char.endPos)
 
 	else
-		self:error("unexpected token", self.curToken)
+		return self:error("unexpected token", self.curToken)
 	end
 end
 

@@ -67,4 +67,17 @@ function ast.String(chars, startPos, endPos)
 	return n
 end
 
+---Internal error representation.
+---@class Error : ASTNode
+
+---@param startPos Position
+---@param endPos Position
+---@return Error
+function ast.Error(startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Error
+	n.type = "Error"
+	return n
+end
+
 return ast
