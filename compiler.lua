@@ -1,4 +1,6 @@
 local Opcode = require 'ops'.Opcode
+local Mode = require 'ops'.Mode
+local Type = require 'token'.Type
 
 local compiler = {}
 
@@ -6,6 +8,7 @@ local compiler = {}
 function compiler:init(ast)
 	self.ast = ast
 	self.code = {}
+	self.short = false
 end
 
 ---@param b number
@@ -26,17 +29,45 @@ function compiler:visit(node)
 end
 
 function compiler:compile()
+	self:visit(self.ast)
+	return self.code
 end
 
 ---@param node Binary
 function compiler:visitBinary(node)
-	error "todo"
+	self:visit(node.left)
+	self:visit(node.right)
+
+	local op = node.op.type
+
+	---@type Opcode
+	local b
+	if     op == Type.PLUS  then b = Opcode.ADD
+	elseif op == Type.MINUS then b = Opcode.SUB
+	elseif op == Type.STAR  then b = Opcode.MUL
+	elseif op == Type.SLASH then b = Opcode.DIV
+	end
+
+	if self.short then b = b | Mode.SHORT end
+
+	self:emitByte(b)
 end
 
 ---@param node Number
 function compiler:visitNumber(node)
-	self:emitByte(Opcode.LIT)
-	self:emitByte(node.value & 0xff)
+	if node.short then
+		self.short = true
+		self:emitByte(Opcode.LIT2)
+		self:emitShort(node.value)
+	else
+		self:emitByte(Opcode.LIT)
+		self:emitByte(node.value)
+	end
+end
+
+---@param node String
+function compiler:visitString(node)
+	error "todo"
 end
 
 return compiler

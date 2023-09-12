@@ -3,6 +3,7 @@
 local reporter = require 'reporter'
 local lexer = require 'lexer'
 local parser = require 'parser'
+local compiler = require 'compiler'
 
 if #arg ~= 2 then
 	io.write("usage: ", arg[0], " <input file> <output file>")
@@ -10,6 +11,8 @@ if #arg ~= 2 then
 end
 
 local inputfname = arg[1]
+local outputfname = arg[2]
+
 local source
 do
 	local inputfile <close>, err = io.open(inputfname, "rb")
@@ -25,5 +28,17 @@ reporter:setSource(source)
 lexer:init(source)
 if reporter:didError() then os.exit(-1) end
 parser:init(lexer:scan())
-local node = parser:parse()
+local ast = parser:parse()
 if reporter:didError() then os.exit(-1) end
+compiler:init(ast)
+local result = compiler:compile()
+
+do
+	local outputfile <close>, err = io.open(outputfname, "w+b")
+	if not outputfile then
+		io.write("couldn't open output file: ", err)
+		os.exit(-1)
+	end
+
+	outputfile:write(string.char(table.unpack(result)))
+end
