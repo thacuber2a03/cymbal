@@ -69,7 +69,7 @@ end
 ---@return string?
 function lexer:peek(off)
 	off = off or 1
-	local next = self.pos + off
+	local next = self.pos.char + off
 	if next <= #self.source then return self.source:sub(next, next) end
 end
 
@@ -82,7 +82,8 @@ function lexer:parseEscape()
 
 	---@type string
 	local e
-	if     c == 'n' then e = '\n'
+	if     c == '0' then e = '\0'
+	elseif c == 'n' then e = '\n'
 	elseif c == 't' then e = '\t'
 	elseif c == 'r' then e = '\r'
 	elseif c == "'" then e = "'"
@@ -170,11 +171,36 @@ function lexer:number()
 	local num = ""
 	self:setStart()
 
-	while self.curChar and self.curChar:match "%d" do
+	local mtch = "%d"
+	local base
+	if self.curChar == '0' and self:peek() and self:peek():match "%a" then
+		self:advance()
+		if self.curChar == 'x' then
+			base = 16
+			mtch = hexDigitPattern
+		elseif self.curChar == 'b' then
+			base = 2
+			mtch = hexDigitPattern
+		else
+			self:error("invalid number format")
+			return
+		end
+		self:advance()
+	end
+
+	while not self:atEnd()
+	and self.curChar:match(mtch) do
 		num = num .. self:advance()
 	end
 
-	self:token(Type.NUMBER, tonumber(num))
+	if base == 2 and num:find "[2-9a-fA-F]" then
+		local dig = "decimal"
+		if num:find "[a-fA-F]" then dig = "hexadecimal" end
+		self:error(dig.." digit(s) on binary literal")
+		return
+	end
+
+	self:token(Type.NUMBER, tonumber(num, base))
 end
 
 ---@return Token[]
