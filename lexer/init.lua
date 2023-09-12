@@ -13,18 +13,37 @@ local hexDigitPattern = "[0-9a-fA-F]"
 ---@field private tokens Token[]
 local lexer = {}
 
-local oneCharToks = {
+local ONE_CHAR_TOKS = {
 	['+'] = Type.PLUS,
 	['-'] = Type.MINUS,
 	['*'] = Type.STAR,
 	['/'] = Type.SLASH,
+	['^'] = Type.CARET,
+	[':'] = Type.COLON,
+	['('] = Type.LPAREN,
+	[')'] = Type.RPAREN,
+	['{'] = Type.LBRACE,
+	['}'] = Type.RBRACE,
 }
 
-local twoCharToks = {
+local TWO_CHAR_TOKS = {
 	["!"] = {
-		["="] = false, -- TODO(thacuber2a03): comparison and equality
+		["="] = Type.NEQ,
 		[false] = Type.BANG,
 	},
+	["="] = {
+		["="] = Type.EQ,
+		[false] = Type.ASSIGN
+	}
+}
+
+local KEYWORDS = {
+	["fn"] = Type.FN,
+	["char"] = Type.BYTE,
+	["byte"] = Type.BYTE,
+	["short"] = Type.SHORT,
+	["string"] = Type.STRING_TYPE,
+	["let"] = Type.LET,
 }
 
 ---@param source string
@@ -43,12 +62,10 @@ function lexer:atEnd() return self.pos.char > #self.source end
 function lexer:pushStart() table.insert(self.startPos, self.pos:copy()) end
 function lexer:popStart() table.remove(self.startPos) end
 function lexer:setStart() self.startPos[#self.startPos] = self.pos:copy() end
----@return Position
-function lexer:getStart() return self.startPos[#self.startPos] end
 
 ---@param msg string
 function lexer:error(msg)
-	local start = self:getStart()
+	local start = self.startPos[#self.startPos]
 	self:popStart()
 	reporter:error(msg, start or self.pos:copy(), self.pos:copy())
 end
@@ -56,7 +73,7 @@ end
 ---@param type Token.Type
 ---@param value any
 function lexer:token(type, value)
-	local start = self:getStart()
+	local start = self.startPos[#self.startPos]
 	self:popStart()
 	table.insert(self.tokens, Token(type, value, start or self.pos:copy(), self.pos:copy()))
 end
@@ -135,7 +152,7 @@ function lexer:character()
 		c = self:advance() --[[@as string]]
 	end
 
-	if self:atEnd() then self:error "missing ending \"'\"" end
+	if self:atEnd() then self:error "missing end \"'\"" end
 
 	self:advance() -- skip "'"
 
@@ -148,7 +165,11 @@ function lexer:string(quote)
 	local raw = quote == '`'
 
 	local function missingEndQuote()
-		self:error "missing end quote (did you intend to make a `raw string`?)"
+		local msg = "missing end quote"
+		if quote ~= '`' then
+			msg = msg .. " (did you intend to make a `raw string`?)"
+		end
+		self:error(msg)
 	end
 
 	self:advance()
@@ -156,7 +177,6 @@ function lexer:string(quote)
 	while not self:atEnd() do
 		if not raw then
 			if self.curChar == '\n' then
-				self:setStart()
 				missingEndQuote()
 				return
 			elseif self.curChar == '\\' then
@@ -167,9 +187,7 @@ function lexer:string(quote)
 		str = str .. self:advance()
 	end
 
-	if self:atEnd() then
-		missingEndQuote()
-	end
+	if self:atEnd() then missingEndQuote() end
 
 	self:advance()
 
@@ -212,16 +230,31 @@ function lexer:number()
 	self:token(Type.NUMBER, tonumber(num, base))
 end
 
+function lexer:identifier()
+	self:setStart()
+	local id = self:advance()
+
+	while not self:atEnd() and self.curChar:match "%w" do
+		id = id .. self:advance()
+	end
+
+	self:token(KEYWORDS[id] or Type.IDENTIFIER, id)
+end
+
 ---@return Token[]
 function lexer:scan()
 	while self.curChar do
 		while self.curChar and self.curChar:match "%s" do
-			self:advance()
+			if self:advance() == '\n' then
+				self:token(Type.NEWLINE)
+			end
 		end
 
 		if not self.curChar then break end
 
-		if self.curChar:match "%d" then self:number()
+		if     self.curChar:match "%d" then self:number()
+
+		elseif self.curChar:match "%a" then self:identifier()
 
 		elseif self.curChar == "'" then self:character()
 
@@ -229,8 +262,8 @@ function lexer:scan()
 		    or self.curChar == '`' then
 			self:string(self.curChar)
 
-		elseif twoCharToks[self.curChar] then
-			local possibleTypes = twoCharToks[self.curChar]
+		elseif TWO_CHAR_TOKS[self.curChar] then
+			local possibleTypes = TWO_CHAR_TOKS[self.curChar]
 			self:advance()
 			local possibleType = possibleTypes[self.curChar]
 			if possibleType then
@@ -240,8 +273,8 @@ function lexer:scan()
 				self:token(possibleTypes[false])
 			end
 
-		elseif oneCharToks[self.curChar] then
-			self:token(oneCharToks[self.curChar])
+		elseif ONE_CHAR_TOKS[self.curChar] then
+			self:token(ONE_CHAR_TOKS[self.curChar])
 			self:advance()
 		else
 			self:error("unknown character '"..self.curChar.."'")

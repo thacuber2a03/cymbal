@@ -9,6 +9,7 @@ local Token = Object:extend()
 
 ---@enum Token.Type
 Token.Type = {
+	IDENTIFIER = "IDENTIFIER",
 	NUMBER = "NUMBER",
 	STRING = "STRING",
 	CHARLIT = "CHARLIT",
@@ -18,6 +19,24 @@ Token.Type = {
 	STAR = "STAR",
 	SLASH = "SLASH",
 	BANG = "BANG",
+	CARET = "CARET",
+	COLON = "COLON",
+	LPAREN = "LPAREN",
+	RPAREN = "RPAREN",
+	LBRACE = "LBRACE",
+	RBRACE = "RBRACE",
+
+	EQ = "EQ",
+	NEQ = "NEQ",
+
+	BYTE = "BYTE",
+	SHORT = "SHORT",
+	STRING_TYPE = "STRING_TYPE",
+
+	FN = "FN",
+	LET = "LET",
+
+	NEWLINE = "NEWLINE",
 
 	EOF = "EOF",
 }

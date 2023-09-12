@@ -55,6 +55,93 @@ function ast.Unary(op, value, startPos, endPos)
 	return n
 end
 
+---@class Deref : ASTNode
+---@field public var Token
+
+---@param var Token
+---@param startPos Position
+---@param endPos Position
+---@return Deref
+function ast.Deref(var, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Deref
+	n.type = "Deref"
+	n.var = var
+	return n
+end
+
+---@class Variable : ASTNode
+---@field public id Token
+
+---@param id Token
+---@param startPos Position
+---@param endPos Position
+---@return Variable
+function ast.Variable(id, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Variable
+	n.type = "Variable"
+	n.id = id
+	return n
+end
+
+---@class VarDecl : ASTNode
+---@field public id Token
+---@field public typename Token
+---@field public value ASTNode
+
+---@param id Token
+---@param typename Token
+---@param value ASTNode
+---@param startPos Position
+---@param endPos Position
+---@return VarDecl
+function ast.VarDecl(id, typename, value, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n VarDecl
+	n.type = "VarDecl"
+	n.id = id
+	n.typename = typename -- inconvenient
+	n.value = value
+	return n
+end
+
+---@class FuncDecl : ASTNode
+---@field public id Token
+---@field public parameters Token[]
+---@field public block Block
+
+---@param id Token
+---@param parameters Token[]
+---@param block Block
+---@param startPos Position
+---@param endPos Position
+---@return FuncDecl
+function ast.FuncDecl(id, parameters, block, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n FuncDecl
+	n.type = "FuncDecl"
+	n.id = id
+	n.parameters = parameters
+	n.block = block
+	return n
+end
+
+---@class Block : ASTNode
+---@field public declarations ASTNode[]
+
+---@param declarations ASTNode[]
+---@param startPos Position
+---@param endPos Position
+---@return Block
+function ast.Block(declarations, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Block
+	n.type = "Block"
+	n.declarations = declarations
+	return n
+end
+
 ---Represents all constants in the code.
 ---@class Literal : ASTNode
 

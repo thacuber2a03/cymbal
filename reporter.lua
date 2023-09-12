@@ -52,7 +52,7 @@ end
 ---@nodiscard
 function reporter:didError() return self.errors > 0 end
 
-local PREFIX = "|"
+local PREFIX = "..."
 local MULTI_PREFIX = "..."
 local LINE_NUM_LEN = 4
 
@@ -68,7 +68,11 @@ function reporter:printLocText(startPos, endPos)
 	if startPos.line == endPos.line then
 		writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line, lines[startPos.line])
 		local s = string.rep(" ", startPos.col-1)
-		s = s .. string.rep("^", math.max(1, endPos.col - startPos.col))
+		if startPos.col == endPos.col then
+			s = s .. "^"
+		else
+			s = s .. "|" .. string.rep("-", math.max(1, endPos.col - startPos.col-2)) .. "|"
+		end
 		writeFmt("%s\t%s\n", PREFIX, s)
 	else
 		local chosenLines = { table.unpack(lines, startPos.line, endPos.line) }
@@ -76,17 +80,17 @@ function reporter:printLocText(startPos, endPos)
 		chosenLines[#chosenLines] = chosenLines[#chosenLines]:sub(1, endPos.col)
 
 		for i, t in ipairs(chosenLines) do
-			writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line + i, t)
+			writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line + i-1, t)
 
 			---@type string
 			local s
 			if i == 1 then
 				s = string.rep(" ", startPos.col-1)
-				s = s .. "^" .. string.rep("-", #t - startPos.col)
+				s = s .. "|" .. string.rep("-", #t - startPos.col-1) .. ">"
 			elseif i == #chosenLines then
-				s = string.rep("-", endPos.col-1) .. "^"
+				s = "<" .. string.rep("-", endPos.col-1) .. "|"
 			else
-				s = string.rep("-", #t)
+				s = "<" .. string.rep("-", #t-2) .. ">"
 			end
 			writeFmt("%s\t%s\n", MULTI_PREFIX, s)
 		end
