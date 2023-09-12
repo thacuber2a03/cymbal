@@ -35,11 +35,14 @@ reporter:setSource(source)
 lexer:init(source)
 local start = os.clock()
 parser:init(lexer:scan())
+endIfError()
 compiler:init(parser:parse())
+endIfError()
 local result = compiler:compile()
+endIfError()
 local finish = os.clock()
 io.write(string.format(
-	"finished compilation in %ims",
+	"successfully finished compilation in %ims",
 	math.floor((finish - start) * 1e6)
 ))
 
