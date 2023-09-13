@@ -71,15 +71,19 @@ end
 ---@param node Unary
 function compiler:visitUnary(node, context)
 	local op = node.op.type
-	if op == Type.MINUS then self:emitBytes(Opcode.LIT, 00) end
+	if op == Type.MINUS then
+		self:emitByte(Opcode.LIT2)
+		self:emitShort(0)
+	end
 
 	self:visit(node.value, context)
 
 	if op == Type.BANG then
-		self:emitBytes(Opcode.LIT, 00)
-		self:emitByte(Opcode.EQU)
+		self:emitByte(Opcode.LIT2)
+		self:emitShort(0)
+		self:emitByte(Opcode.EQU | Mode.SHORT)
 	elseif op == Type.MINUS then
-		self:emitByte(Opcode.SUB)
+		self:emitByte(Opcode.SUB | Mode.SHORT)
 	end
 end
 
@@ -105,9 +109,7 @@ function compiler:visitBinary(node, context)
 	elseif op == Type.SLASH then b = Opcode.DIV
 	end
 
-	if self.short then b = b | Mode.SHORT end
-
-	self:emitByte(b)
+	self:emitByte(b | Mode.SHORT)
 
 	context:addType(node, "number")
 	self.short = false
@@ -118,13 +120,8 @@ function compiler:visitNumber(node, context)
 	-- TODO(thacuber2a03): either somehow predict if
 	-- the whole expression will have any shorts, or
 	-- only compile as shorts
-	if node.short then
-		self.short = true
-		self:emitByte(Opcode.LIT2)
-		self:emitShort(node.value)
-	else
-		self:emitBytes(Opcode.LIT, node.value)
-	end
+	self:emitByte(Opcode.LIT2)
+	self:emitShort(node.value)
 
 	context:addType(node, "number")
 end
@@ -159,11 +156,7 @@ end
 
 function compiler:visitVarDecl(node, context)
 	self:visit(node.value, context)
-	local b = Opcode.STH
-	if context:containsType(node.value, "string") then
-		b = b | Mode.SHORT
-	end
-	self:emitByte(b)
+	self:emitByte(Opcode.STH | Mode.SHORT)
 
 	context:declareVariable(node.id)
 	context:defineVariable(node.id, node.type, node.value)
