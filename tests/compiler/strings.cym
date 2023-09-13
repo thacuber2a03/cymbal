@@ -1,1 +1,4 @@
-"aeiou"
+fn main()
+{
+	let str: string = "aeiou";
+}

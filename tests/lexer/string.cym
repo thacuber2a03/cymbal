@@ -1,1 +1,4 @@
-"this\ris a string\nwith escape \x0a\tsequences"
+fn main()
+{
+	let str: string = "this\ris a string\nwith escape \x0a\tsequences"
+}

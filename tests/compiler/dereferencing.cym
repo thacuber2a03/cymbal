@@ -1,2 +1,5 @@
-let someVar: ^byte
-someVar^
+fn main()
+{
+	let someVar: ^byte = 0;
+	someVar^;
+}
