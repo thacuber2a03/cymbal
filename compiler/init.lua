@@ -89,15 +89,19 @@ end
 
 ---@param node Binary
 function compiler:visitBinary(node, context)
+	if context:isType(node, "byte") then
+		context:setType(node.left, "byte")
+		context:setType(node.right, "byte")
+	end
+
 	self:visit(node.left, context)
 	self:visit(node.right, context)
 
+	--[[
 	local function failedAttempt(n)
 		self:error("attempt to perform arithmetic on "..n.type:lower(), n)
 	end
-
-	if not context:containsType(node.left,  "number") then failedAttempt(node.left) end
-	if not context:containsType(node.right, "number") then failedAttempt(node.right) end
+	--]]
 
 	local op = node.op.type
 
@@ -110,20 +114,16 @@ function compiler:visitBinary(node, context)
 	end
 
 	self:emitByte(b | Mode.SHORT)
-
-	context:addType(node, "number")
-	self.short = false
 end
 
 ---@param node Number
 function compiler:visitNumber(node, context)
-	-- TODO(thacuber2a03): either somehow predict if
-	-- the whole expression will have any shorts, or
-	-- only compile as shorts
-	self:emitByte(Opcode.LIT2)
-	self:emitShort(node.value)
-
-	context:addType(node, "number")
+	if context:isType(node, "byte") then
+		self:emitBytes(Opcode.LIT, node.value)
+	else
+		self:emitByte(Opcode.LIT2)
+		self:emitShort(node.value)
+	end
 end
 
 ---@param node Deref
@@ -142,25 +142,25 @@ function compiler:visitString(node, context) ---@diagnostic disable-line: unused
 		ptr = #self.code+1,
 	})
 	self:emitShort(0) -- space for pointer placeholder
-	context:addType(node, "string")
+	context:setType(node, "string")
 end
 
 local function getTypeNameFromTok(tok)
 	local v = tok.type
-	if v == Type.BYTE
-	or v == Type.SHORT then
-		return "number"
-	end
+	if v == Type.BYTE then return "byte" end
+	if v == Type.SHORT then return "short" end
+	if v == Type.STRING_TYPE then return "string" end
 	return "unknown"
 end
 
 function compiler:visitVarDecl(node, context)
+	if context:declareVariable(node.id) then
+		self:error("variable already defined", node.id)
+	end
+	context:defineVariable(node.id, node.type, node.value)
+	context:setType(node.value, getTypeNameFromTok(node.type))
 	self:visit(node.value, context)
 	self:emitByte(Opcode.STH | Mode.SHORT)
-
-	context:declareVariable(node.id)
-	context:defineVariable(node.id, node.type, node.value)
-	context:addType(node, getTypeNameFromTok(node.type))
 end
 
 function compiler:visitFuncDecl(node, context)

@@ -7,22 +7,14 @@ function Context:new()
 	self.variables = {}
 end
 
-function Context:addType(value, typ)
-	self.types[value] = self.types[value] or {}
-	if type(typ) == "table" then
-		for _, v in ipairs(typ) do
-			self.types[value][v] = true
-		end
-	else
-		self.types[value][typ] = true
-	end
-end
-
-function Context:containsType(value, type) return not not self.types[value][type] end
+function Context:setType(value, type) self.types[value] = type end
 function Context:getType(value) return self.types[value] end
+function Context:isType(value, type) return self.types[value] == type end
 
 function Context:declareVariable(tok)
+	if self.variables[tok.value] then return true end
 	self.variables[tok.value] = {}
+	return false
 end
 
 function Context:defineVariable(id, type, value)

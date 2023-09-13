@@ -55,6 +55,7 @@ function reporter:didError() return self.errors > 0 end
 local PREFIX = "..."
 local MULTI_PREFIX = "..."
 local LINE_NUM_LEN = 4
+local SPACES_PER_TAB = 8
 
 ---@private
 function reporter:printLocText(startPos, endPos)
@@ -66,8 +67,13 @@ function reporter:printLocText(startPos, endPos)
 	end
 
 	if startPos.line == endPos.line then
-		writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line, lines[startPos.line])
-		local s = string.rep(" ", startPos.col-1)
+		local line = lines[startPos.line]
+		writeFmt("%."..LINE_NUM_LEN.."i\t%s\n", startPos.line, line)
+		local tabCount = 0
+		for _ in line:gmatch "\t" do tabCount = tabCount + 1 end
+		local s = ""
+		s = s .. string.rep(" ", tabCount * SPACES_PER_TAB - tabCount)
+		s = s .. string.rep(" ", startPos.col-1)
 		if startPos.col == endPos.col then
 			s = s .. "^"
 		else
