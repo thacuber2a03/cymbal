@@ -179,8 +179,11 @@ function compiler:visitVarDecl(node, context)
 	self:emitByte(Opcode.STH | Mode.SHORT)
 end
 
+---@param node FuncDecl
 function compiler:visitFuncDecl(node, context)
 	self:visit(node.block, context)
+
+	if node.id.value ~= "main" then error "todo func decl" end
 end
 
 function compiler:visitBlock(node, context)
