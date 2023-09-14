@@ -177,10 +177,13 @@ function parser:exprStmt()
 	return expr
 end
 
+---@param method string
+---@param tokTypes Token.Type[]
+---@param resultNodeName string
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
-function parser:binary(method, tokTypes)
+function parser:binary(method, tokTypes, resultNodeName)
 	---@type ASTNode
 	local left = self[method](self)
 
@@ -192,7 +195,7 @@ function parser:binary(method, tokTypes)
 				local op = self:advance()
 				---@type ASTNode
 				local right = self[method](self)
-				left = ast.Binary(left, op, right, left.startPos, right.endPos)
+				left = ast[resultNodeName](left, op, right, left.startPos, right.endPos)
 				---@cast left Binary
 			end
 		end
@@ -206,24 +209,24 @@ end
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
-function parser:equality() return self:binary("comparison", { Type.EQ, Type.NEQ }) end
+function parser:equality() return self:binary("comparison", { Type.EQ, Type.NEQ }, "Equality") end
 
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
 function parser:comparison()
-	return self:binary("expr", { Type.LESS, Type.LEQ, Type.GREATER, Type.GEQ })
+	return self:binary("expr", { Type.LESS, Type.LEQ, Type.GREATER, Type.GEQ }, "Binary")
 end
 
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
-function parser:expr() return self:binary("term",   { Type.PLUS, Type.MINUS }) end
+function parser:expr() return self:binary("term", { Type.PLUS, Type.MINUS }, "Binary") end
 
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
-function parser:term()       return self:binary("primary", { Type.STAR, Type.SLASH }) end
+function parser:term() return self:binary("primary", { Type.STAR, Type.SLASH }, "Binary") end
 
 function parser:primary()
 	if not (self:check(Type.MINUS) or self:check(Type.BANG)) then

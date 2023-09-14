@@ -37,6 +37,27 @@ function ast.Binary(left, op, right, startPos, endPos)
 	return n
 end
 
+---@class Equality : ASTNode
+---@field public left ASTNode
+---@field public op Token
+---@field public right ASTNode
+
+---@param left ASTNode
+---@param op Token
+---@param right ASTNode
+---@param startPos Position
+---@param endPos Position
+---@return Binary
+function ast.Equality(left, op, right, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Equality
+	n.type = "Equality"
+	n.left = left
+	n.op = op
+	n.right = right
+	return n
+end
+
 ---@class Unary : ASTNode
 ---@field public op Token
 ---@field public value ASTNode
