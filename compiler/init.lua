@@ -95,11 +95,6 @@ end
 
 ---@param node Binary
 function compiler:visitBinary(node, context)
-	if context:isType(node, "byte") then
-		context:setType(node.left, "byte")
-		context:setType(node.right, "byte")
-	end
-
 	self:visit(node.left, context)
 	self:visit(node.right, context)
 
@@ -144,10 +139,9 @@ end
 
 ---@param node Deref
 function compiler:visitDeref(node, context)
-	require 'debugger' ()
 	local var = context:getVariable(node.var)
 	if not var then self:error("undefined variable", node.var) end
-	self:emitByte(Opcode.LDR)
+	error "todo"
 end
 
 ---@param node String
@@ -164,6 +158,7 @@ end
 ---@param node Boolean
 function compiler:visitBoolean(node, context)
 	self:emitBytes(Opcode.LIT, node.state and 1 or 0)
+	context:setType(node, "boolean")
 end
 
 local function getTypeNameFromTok(tok)
