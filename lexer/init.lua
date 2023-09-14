@@ -34,6 +34,14 @@ local TWO_CHAR_TOKS = {
 	["="] = {
 		["="] = Type.EQ,
 		[false] = Type.ASSIGN
+	},
+	["<"] = {
+		["="] = Type.LEQ,
+		[false] = Type.LESS,
+	},
+	[">"] = {
+		["="] = Type.GEQ,
+		[false] = Type.GREATER,
 	}
 }
 
@@ -44,6 +52,11 @@ local KEYWORDS = {
 	["short"] = Type.SHORT,
 	["string"] = Type.STRING_TYPE,
 	["let"] = Type.LET,
+	["bool"] = Type.BOOL,
+	["true"] = Type.TRUE,
+	["false"] = Type.FALSE,
+	["null"] = Type.NULL,
+	["while"] = Type.WHILE,
 }
 
 ---@param source string
@@ -238,7 +251,8 @@ function lexer:identifier()
 		id = id .. self:advance()
 	end
 
-	self:token(KEYWORDS[id] or Type.IDENTIFIER, id)
+	local keyword = KEYWORDS[id]
+	self:token(keyword or Type.IDENTIFIER, not keyword and id or nil)
 end
 
 ---@return Token[]

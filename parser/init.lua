@@ -96,7 +96,7 @@ function parser:funcDecl()
 		parameters = self:parameters()
 	end
 	self:expect(Type.RPAREN, "expected ')'")
-	self:match(Type.NEWLINE)
+	while self:match(Type.NEWLINE) do end
 	local block = self:block()
 	return ast.FuncDecl(name, parameters, block, fn.startPos, block.endPos)
 end
@@ -112,12 +112,14 @@ end
 function parser:block()
 	local lbrace = self:expect(Type.LBRACE, "expected '{'")
 	---@cast lbrace -?
-	self:match(Type.NEWLINE)
+	while self:match(Type.NEWLINE) do end
 	local declarations = {}
-	while not (self:atEnd() or self:check(Type.RBRACE)) do
-		table.insert(declarations, self:declaration())
+	if not self:check(Type.RBRACE) then
+		while not (self:atEnd() or self:check(Type.RBRACE)) do
+			while self:match(Type.NEWLINE) do end
+			table.insert(declarations, self:declaration())
+		end
 	end
-	self:match(Type.NEWLINE)
 	local rbrace = self:expect(Type.RBRACE, "expected '}'")
 	---@cast rbrace -?
 	return ast.Block(declarations, lbrace.startPos, rbrace.endPos)
@@ -144,7 +146,8 @@ end
 function parser:typename()
 	if self:check(Type.BYTE)
 	or self:check(Type.SHORT)
-	or self:check(Type.STRING_TYPE) then
+	or self:check(Type.STRING_TYPE)
+	or self:check(Type.BOOL) then
 		return self:advance()
 	end
 
@@ -152,7 +155,20 @@ function parser:typename()
 end
 
 function parser:statement()
+	if self:check(Type.WHILE) then return self:whileStmt()
+	end
 	return self:exprStmt()
+end
+
+function parser:whileStmt()
+	local whileTok = self:expect(Type.WHILE, "expected while")
+	self:expect(Type.LPAREN, "expected '('")
+	local condition = self:equality()
+	self:expect(Type.RPAREN, "expected ')'")
+	while self:match(Type.NEWLINE) do end
+	local block = self:block()
+	while self:match(Type.NEWLINE) do end
+	return ast.While(condition, block, whileTok.startPos, block.endPos)
 end
 
 function parser:exprStmt()
@@ -190,6 +206,18 @@ end
 ---@return ASTNode | Binary
 ---@nodiscard
 ---@private
+function parser:equality() return self:binary("comparison", { Type.EQ, Type.NEQ }) end
+
+---@return ASTNode | Binary
+---@nodiscard
+---@private
+function parser:comparison()
+	return self:binary("expr", { Type.LESS, Type.LEQ, Type.GREATER, Type.GEQ })
+end
+
+---@return ASTNode | Binary
+---@nodiscard
+---@private
 function parser:expr() return self:binary("term",   { Type.PLUS, Type.MINUS }) end
 
 ---@return ASTNode | Binary
@@ -207,7 +235,7 @@ function parser:primary()
 	return ast.Unary(op, primary, op.startPos, primary.endPos)
 end
 
----@return Number | Error | String | Deref | Variable
+---@return Number | Error | String | Deref | Variable | Boolean | Null
 ---@nodiscard
 ---@private
 function parser:factor()
@@ -239,6 +267,15 @@ function parser:factor()
 			return ast.Deref(id, id.startPos, caret.endPos)
 		end
 		return ast.Variable(id.value, id.startPos, id.endPos)
+
+	elseif self:check(Type.TRUE) or self:check(Type.FALSE) then
+		local bool = self:advance()
+		return ast.Boolean(bool.type == Type.TRUE, bool.startPos, bool.endPos)
+
+	elseif self:check(Type.NULL) then
+		local null = self:advance()
+		return ast.Null(null.startPos, null.endPos)
+
 	else
 		return self:error("unexpected token "..tostring(self.curToken), self.curToken)
 	end

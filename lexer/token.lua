@@ -28,13 +28,23 @@ Token.Type = {
 
 	EQ = "EQ",
 	NEQ = "NEQ",
+	LESS = "LESS",
+	LEQ = "LEQ",
+	GREATER = "GREATER",
+	GEQ = "GEQ",
 
 	BYTE = "BYTE",
 	SHORT = "SHORT",
 	STRING_TYPE = "STRING_TYPE",
+	BOOL = "BOOL",
+
+	TRUE = "TRUE",
+	FALSE = "FALSE",
+	NULL = "NULL",
 
 	FN = "FN",
 	LET = "LET",
+	WHILE = "WHILE",
 
 	NEWLINE = "NEWLINE",
 

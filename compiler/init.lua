@@ -21,6 +21,12 @@ function compiler:error(msg, node)
 	reporter:error(msg, node.startPos, node.endPos)
 end
 
+---Returns a pointer to the current byte in memory.
+---@return integer
+function compiler:where()
+	return #self.code + self.memOff
+end
+
 ---@param b integer
 function compiler:emitByte(b)
 	table.insert(self.code, b & 0xff)
@@ -56,7 +62,7 @@ function compiler:compile()
 
 	-- fix pointers to strings
 	for _, s in ipairs(self.stringPtrs) do
-		local here = #self.code + self.memOff
+		local here = self:where()
 		for i=1, #s.str do
 			self:emitByte(string.byte(s.str:sub(i,i)))
 		end
@@ -103,15 +109,25 @@ function compiler:visitBinary(node, context)
 	end
 	--]]
 
+	context:setType(node, "number")
+
 	local op = node.op.type
 
 	---@type Opcode
 	local b
-	if     op == Type.PLUS  then b = Opcode.ADD
-	elseif op == Type.MINUS then b = Opcode.SUB
-	elseif op == Type.STAR  then b = Opcode.MUL
-	elseif op == Type.SLASH then b = Opcode.DIV
+	if     op == Type.PLUS    then b = Opcode.ADD
+	elseif op == Type.MINUS   then b = Opcode.SUB
+	elseif op == Type.STAR    then b = Opcode.MUL
+	elseif op == Type.SLASH   then b = Opcode.DIV
 	end
+
+	if not b then context:setType(node, "boolean") end
+
+	if     op == Type.LESS    then b = Opcode.LTH
+	elseif op == Type.GREATER then b = Opcode.GTH
+	end
+
+	if not b then error("no support for operator "..op) end
 
 	self:emitByte(b | Mode.SHORT)
 end
@@ -145,6 +161,11 @@ function compiler:visitString(node, context) ---@diagnostic disable-line: unused
 	context:setType(node, "string")
 end
 
+---@param node Boolean
+function compiler:visitBoolean(node, context)
+	self:emitBytes(Opcode.LIT, node.state and 1 or 0)
+end
+
 local function getTypeNameFromTok(tok)
 	local v = tok.type
 	if v == Type.BYTE then return "byte" end
@@ -171,6 +192,33 @@ function compiler:visitBlock(node, context)
 	for _, d in ipairs(node.declarations) do
 		self:visit(d, context)
 	end
+end
+
+---@param node While
+function compiler:visitWhile(node, context)
+	self:visit(node.condition, context)
+	if context:getType(node.condition) ~= "boolean" then
+		self:error("loop condition must be an expression that resolves to a boolean", node.condition)
+	end
+
+	self:emitBytes(Opcode.LIT, 0)
+	local checkCondPtr = self:where()
+	self:emitByte(Opcode.EQU | Mode.KEEP)
+	self:emitByte(Opcode.JCI)
+	local blockEndPtr = self:where() - self.memOff + 1
+	self:emitShort(0)
+	local blockStart = self:where()
+
+	self:visit(node.block, context)
+
+	self:emitByte(Opcode.JMI)
+	self:emitShort(checkCondPtr-self:where()-2)
+	local blockEndOff = self:where() - blockStart
+	self:emitByte(Opcode.POP | Mode.SHORT) -- zero to compare it to
+	self:emitByte(Opcode.POP | Mode.SHORT) -- condition
+
+	self.code[blockEndPtr + 0] = (blockEndOff >> 8) & 0xff
+	self.code[blockEndPtr + 1] =  blockEndOff       & 0xff
 end
 
 return compiler

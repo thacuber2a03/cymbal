@@ -142,6 +142,24 @@ function ast.Block(declarations, startPos, endPos)
 	return n
 end
 
+---@class While : ASTNode
+---@field public condition Binary | Literal
+---@field public block Block
+
+---@param condition Binary | Literal
+---@param block Block
+---@param startPos Position
+---@param endPos Position
+---@return Block
+function ast.While(condition, block, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n While
+	n.type = "While"
+	n.condition = condition
+	n.block = block
+	return n
+end
+
 ---Represents all constants in the code.
 ---@class Literal : ASTNode
 
@@ -172,6 +190,31 @@ function ast.String(chars, startPos, endPos)
 	---@cast n String
 	n.type = "String"
 	n.chars = chars
+	return n
+end
+
+---@class Boolean : Literal
+---@field public state boolean
+
+---@param state boolean
+---@param startPos Position
+---@param endPos Position
+function ast.Boolean(state, startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Boolean
+	n.type = "Boolean"
+	n.state = state
+	return n
+end
+
+---@class Null : Literal
+
+---@param startPos Position
+---@param endPos Position
+function ast.Null(startPos, endPos)
+	local n = newNode(startPos, endPos)
+	---@cast n Null
+	n.type = "Null"
 	return n
 end
 
