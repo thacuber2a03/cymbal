@@ -2,6 +2,7 @@ package lexer_test
 
 import (
 	"testing"
+	"fmt"
 
 	"github.com/thacuber2a03/cymbal/lexer"
 )
@@ -31,23 +32,19 @@ func TestBasicSourceLexing(t *testing.T) {
 
 	for i, state := range expected {
 		tok := l.Next()
+		if tok.Type == lexer.TT_ERROR {
+			t.Errorf("lexer threw an error: %s (at line %d)", tok.Lexeme, tok.Line)
+			continue
+		}
+
+		at := fmt.Sprintf("expected token @ index %d", i)
 
 		if tok.Type != state.tokType {
-			t.Errorf("Expected token %d to have type %v, had type %v",
-				i, state.tokType, tok.Type)
-			continue
-		}
-
-		if tok.Lexeme != state.lexeme {
-			t.Errorf("Expected token %d's lexeme to be %q, was %q",
-				i, state.lexeme, tok.Lexeme)
-			continue
-		}
-
-		if tok.Line != state.line {
-			t.Errorf("Expected token %d to be at line %d, was at line %d",
-				i, state.line, tok.Line)
-			continue
+			t.Errorf("%s to have type %v, had type %v", at, state.tokType, tok.Type)
+		} else if tok.Lexeme != state.lexeme {
+			t.Errorf("%s's lexeme to be %q, was %q", at, state.lexeme, tok.Lexeme)
+		} else if tok.Line != state.line {
+			t.Errorf("%s to be at line %d, was at line %d", at, state.line, tok.Line)
 		}
 	}
 }

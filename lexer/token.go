@@ -4,6 +4,7 @@ type TokenType int
 
 const (
 	TT_EOF TokenType = iota
+	TT_ERROR
 
 	TT_IDENT
 	TT_INT

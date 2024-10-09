@@ -9,19 +9,20 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[TT_EOF-0]
-	_ = x[TT_IDENT-1]
-	_ = x[TT_INT-2]
-	_ = x[TT_CHAR-3]
-	_ = x[TT_LBRACE-4]
-	_ = x[TT_COMMA-5]
-	_ = x[TT_RBRACE-6]
-	_ = x[TT_FN-7]
-	_ = x[TT_DEO-8]
+	_ = x[TT_ERROR-1]
+	_ = x[TT_IDENT-2]
+	_ = x[TT_INT-3]
+	_ = x[TT_CHAR-4]
+	_ = x[TT_LBRACE-5]
+	_ = x[TT_COMMA-6]
+	_ = x[TT_RBRACE-7]
+	_ = x[TT_FN-8]
+	_ = x[TT_DEO-9]
 }
 
-const _TokenType_name = "EOFIDENTINTCHARLBRACECOMMARBRACEFNDEO"
+const _TokenType_name = "EOFERRORIDENTINTCHARLBRACECOMMARBRACEFNDEO"
 
-var _TokenType_index = [...]uint8{0, 3, 8, 11, 15, 21, 26, 32, 34, 37}
+var _TokenType_index = [...]uint8{0, 3, 8, 13, 16, 20, 26, 31, 37, 39, 42}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {
