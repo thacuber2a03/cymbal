@@ -1,7 +1,8 @@
 > [!NOTE]
 > this project is in the process of getting rebooted.
 > the new compiler will be written in Go, but there might also be implementations in other languages.
-> progress will be done on the `gong` branch of this repository, consider this branch archived for now.
+> progress will be done on the [`gong`](https://github.com/thacuber2a03/cymbal/tree/gong)
+> branch of this repository, consider this branch archived for now.
 
 # Cymbal
 
