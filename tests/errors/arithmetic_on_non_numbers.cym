@@ -1,3 +1,0 @@
-fn main() {
-	let error: short = 1 + "aeiou" * 3
-}

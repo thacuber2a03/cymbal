@@ -1,4 +1,0 @@
-fn main()
-{
-	let bigNum: short = 0x10000
-}

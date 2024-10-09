@@ -1,6 +1,0 @@
-fn main()
-{
-	let a: string = "this is an unclosed string
-	let b: string = `unclosed raw string
-asjldksjaldksjd
-}

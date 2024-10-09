@@ -1,4 +1,0 @@
-fn main()
-{
-	let someValue: byte = 1 + -4 * 8
-}

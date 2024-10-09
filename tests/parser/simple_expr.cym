@@ -1,4 +1,0 @@
-fn main()
-{
-	let seven: byte = 1 + 2 * 3
-}

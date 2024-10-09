@@ -1,6 +1,0 @@
-fn main()
-{
-	let someVar: byte = 1
-	let someOtherVar: short = 20 + 40
-	let yetAnotherVar: string = "Hello world!"
-}
