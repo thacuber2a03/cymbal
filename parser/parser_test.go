@@ -5,9 +5,10 @@ import (
 
 	"github.com/thacuber2a03/cymbal/lexer"
 	"github.com/thacuber2a03/cymbal/parser"
+	"github.com/thacuber2a03/cymbal/ast"
 )
 
-func parseProgram(t *testing.T, source string) *parser.Program {
+func parseProgram(t *testing.T, source string) *ast.Program {
 	l := lexer.New(source)
 	p := parser.New(l)
 	prog := p.Parse()
@@ -23,8 +24,8 @@ func parseProgram(t *testing.T, source string) *parser.Program {
 	return prog
 }
 
-func matchLiteral(t *testing.T, e parser.Expression, n string, v int16) bool {
-	lit, ok := e.(*parser.Literal)
+func matchLiteral(t *testing.T, e ast.Expression, n string, v int16) bool {
+	lit, ok := e.(*ast.Literal)
 	if !ok {
 		t.Errorf("expected %s to be a Literal, got %T", n, e)
 	}
@@ -48,13 +49,13 @@ func TestBasicParsing(t *testing.T) {
 			len(prog.Declarations))
 	}
 
-	main, ok := prog.Declarations[0].(*parser.MainDecl)
+	main, ok := prog.Declarations[0].(*ast.MainDecl)
 	if !ok {
 		t.Fatalf("expected single declaration to be a MainDecl, got %T",
 			prog.Declarations[0])
 	}
 
-	deo, ok := main.Statements[0].(*parser.DEOStatement)
+	deo, ok := main.Statements[0].(*ast.DEOStatement)
 	if !ok {
 		t.Fatalf("expected single main statement to be a DEOStatement, got %T",
 			main.Statements[0])

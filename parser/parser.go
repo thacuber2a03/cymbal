@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/thacuber2a03/cymbal/lexer"
+	"github.com/thacuber2a03/cymbal/ast"
 )
 
 type ParseError struct {
@@ -73,7 +74,7 @@ func (p *Parser) expect(tt lexer.TokenType) bool {
 	return true
 }
 
-func (p *Parser) expression() (res Expression) {
+func (p *Parser) expression() (res ast.Expression) {
 	// TODO(thacuber2a03): insert an actual expression parser here
 
 	if p.check(lexer.TT_INT) {
@@ -83,21 +84,21 @@ func (p *Parser) expression() (res Expression) {
 			return nil
 		}
 
-		res = &Literal{Value: int16(val)}
+		res = &ast.Literal{Value: int16(val)}
 		p.advance()
 		return
 	} else if p.check(lexer.TT_CHAR) {
-		res = &Literal{Value: int16(p.curTok.Lexeme[1])}
+		res = &ast.Literal{Value: int16(p.curTok.Lexeme[1])}
 		p.advance()
 		return
 	}
 
 	p.error(p.curTok, "expected expression")
-	return nil
+	return
 }
 
-func (p *Parser) deoStmt() *DEOStatement {
-	deo := &DEOStatement{}
+func (p *Parser) deoStmt() *ast.DEOStatement {
+	deo := &ast.DEOStatement{}
 
 	if deo.Port = p.expression(); deo.Port == nil {
 		return nil
@@ -114,15 +115,15 @@ func (p *Parser) deoStmt() *DEOStatement {
 	return deo
 }
 
-func (p *Parser) statement() Statement {
+func (p *Parser) statement() ast.Statement {
 	if p.match(lexer.TT_DEO) {
 		return p.deoStmt()
 	}
 	return nil
 }
 
-func (p *Parser) block() *Block {
-	b := &Block{}
+func (p *Parser) block() *ast.Block {
+	b := &ast.Block{}
 
 	for !(p.atEnd() || p.check(lexer.TT_RBRACE)) {
 		s := p.statement()
@@ -138,22 +139,22 @@ func (p *Parser) block() *Block {
 	return b
 }
 
-func (p *Parser) mainDecl() *MainDecl {
+func (p *Parser) mainDecl() *ast.MainDecl {
 	if !p.expect(lexer.TT_LBRACE) {
 		return nil
 	}
-	return (*MainDecl)(p.block())
+	return (*ast.MainDecl)(p.block())
 }
 
-func (p *Parser) declaration() Declaration {
+func (p *Parser) declaration() ast.Declaration {
 	if p.match(lexer.TT_MAIN) {
 		return p.mainDecl()
 	}
 	return nil
 }
 
-func (p *Parser) program() *Program {
-	prog := &Program{}
+func (p *Parser) program() *ast.Program {
+	prog := &ast.Program{}
 
 	for !p.check(lexer.TT_EOF) {
 		d := p.declaration()
@@ -167,7 +168,7 @@ func (p *Parser) program() *Program {
 
 // Parses the program and returns an AST representation of it.
 // Returns nil if there has been any errors.
-func (p *Parser) Parse() *Program {
+func (p *Parser) Parse() *ast.Program {
 	if !p.advance() {
 		return nil
 	}

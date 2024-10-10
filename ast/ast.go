@@ -1,6 +1,7 @@
-package parser
+package ast
 
 import (
+	// NOTE(thacuber2a03): might use later
 	// "github.com/thacuber2a03/cymbal/lexer"
 )
 
