@@ -7,25 +7,25 @@ import (
 )
 
 type Lexer struct {
-	Source string
+	source string
 	index  int
 	line   uint
 }
 
 func New(source string) *Lexer {
 	return &Lexer{
-		Source: source,
+		source: source,
 		line:   1,
 	}
 }
 
-func (l *Lexer) atEnd() bool { return l.index >= len(l.Source) }
+func (l *Lexer) atEnd() bool { return l.index >= len(l.source) }
 
 func (l *Lexer) peekChar() byte {
 	if l.atEnd() {
 		return 0
 	}
-	return l.Source[l.index]
+	return l.source[l.index]
 }
 
 func (l *Lexer) nextChar() byte {
