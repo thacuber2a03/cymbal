@@ -17,12 +17,13 @@ func _() {
 	_ = x[TT_COMMA-6]
 	_ = x[TT_RBRACE-7]
 	_ = x[TT_FN-8]
-	_ = x[TT_DEO-9]
+	_ = x[TT_MAIN-9]
+	_ = x[TT_DEO-10]
 }
 
-const _TokenType_name = "EOFERRORIDENTINTCHARLBRACECOMMARBRACEFNDEO"
+const _TokenType_name = "EOFERRORIDENTINTCHARLBRACECOMMARBRACEFNMAINDEO"
 
-var _TokenType_index = [...]uint8{0, 3, 8, 13, 16, 20, 26, 31, 37, 39, 42}
+var _TokenType_index = [...]uint8{0, 3, 8, 13, 16, 20, 26, 31, 37, 39, 43, 46}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

@@ -52,6 +52,7 @@ func isValidIdent(ch byte) bool {
 
 var keywords = map[string]TokenType{
 	"fn":  TT_FN,
+	"main": TT_MAIN,
 	"deo": TT_DEO,
 }
 

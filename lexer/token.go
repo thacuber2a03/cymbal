@@ -15,6 +15,7 @@ const (
 	TT_RBRACE
 
 	TT_FN
+	TT_MAIN
 	TT_DEO
 )
 

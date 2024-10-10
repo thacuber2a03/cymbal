@@ -8,7 +8,7 @@ import (
 )
 
 func TestBasicSourceLexing(t *testing.T) {
-	source := `fn main {
+	source := `main {
 	deo 0x18, 'a'
 }`
 
@@ -17,8 +17,7 @@ func TestBasicSourceLexing(t *testing.T) {
 		lexeme  string
 		line    uint
 	}{
-		{lexer.TT_FN, "fn", 1},
-		{lexer.TT_IDENT, "main", 1},
+		{lexer.TT_MAIN, "main", 1},
 		{lexer.TT_LBRACE, "{", 1},
 		{lexer.TT_DEO, "deo", 2},
 		{lexer.TT_INT, "0x18", 2},
