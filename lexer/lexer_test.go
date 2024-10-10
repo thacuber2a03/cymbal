@@ -7,7 +7,7 @@ import (
 	"github.com/thacuber2a03/cymbal/lexer"
 )
 
-func TestBasicSourceLexing(t *testing.T) {
+func TestBasicLexing(t *testing.T) {
 	source := `main {
 	deo 0x18, 'a'
 }`
