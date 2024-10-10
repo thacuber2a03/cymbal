@@ -55,4 +55,4 @@ type Literal struct {
 	Value int16
 }
 
-func (_ Literal) exprNode() {}
+func (_ *Literal) exprNode() {}
