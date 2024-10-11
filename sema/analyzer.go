@@ -6,6 +6,8 @@ import (
 
 type Analyzer struct {
 	program *ast.Program
+	// TODO(thacuber2a03): this doesn't have an use yet
+	Errors  []string
 }
 
 func (a *Analyzer) Visit(n ast.Node) ast.Visitor {
@@ -20,14 +22,15 @@ func (a *Analyzer) Visit(n ast.Node) ast.Visitor {
 		}
 		return a.Visit(v.Value)
 	case *ast.Literal:
-		return a // alr
+		return a // all right
 	}
 
-	panic("(should be) unreachable")
+	panic("(should be?) unreachable")
 }
 
-func (a *Analyzer) Analyze() {
+func (a *Analyzer) Analyze() bool {
 	ast.WalkDeclarations(a, a.program.Declarations)
+	return len(a.Errors) == 0
 }
 
 func New(program *ast.Program) *Analyzer {
