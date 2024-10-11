@@ -11,9 +11,11 @@
 program     -> declaration* EOF
 declaration -> mainDecl
 mainDecl    -> MAIN block
-block       -> LBRACE statement* RBRACE
+
 statement   -> deoStmt
+block       -> LBRACE statement* RBRACE
 deoStmt     -> DEO expression COMMA expression
+
 expression  -> literal
 literal     -> CHAR | INT
 ```
