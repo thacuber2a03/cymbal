@@ -1,4 +1,4 @@
-package semantic
+package sema
 
 import (
 	"github.com/thacuber2a03/cymbal/ast"
@@ -9,16 +9,18 @@ type Analyzer struct {
 }
 
 func (a *Analyzer) Visit(n ast.Node) ast.Visitor {
-	// TODO(thacuber2a03): fill this in
-	// (I'm not even totally sure I'm doing this right...)
+	switch v := n.(type) {
+	case *ast.MainDecl:
+		return ast.WalkStatements(a, v.Statements)
+	case *ast.Block:
+		return ast.WalkStatements(a, v.Statements)
+	}
+
+	panic("(should be) unreachable")
 }
 
 func (a *Analyzer) Analyze() {
-	for _, d := range a.program.Declarations {
-		if a = a.Visit(d); a == nil {
-			return
-		}
-	}
+	ast.WalkDeclarations(a, a.program.Declarations)
 }
 
 func New(program *ast.Program) *Analyzer {
