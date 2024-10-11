@@ -14,6 +14,13 @@ func (a *Analyzer) Visit(n ast.Node) ast.Visitor {
 		return ast.WalkStatements(a, v.Statements)
 	case *ast.Block:
 		return ast.WalkStatements(a, v.Statements)
+	case *ast.DEOStatement:
+		if a = a.Visit(v.Port).(*Analyzer); a == nil {
+			return a
+		}
+		return a.Visit(v.Value)
+	case *ast.Literal:
+		return a // alr
 	}
 
 	panic("(should be) unreachable")
