@@ -30,9 +30,12 @@ func (a *Analyzer) Visit(n ast.Node) ast.Visitor {
 
 func (a *Analyzer) Analyze() bool {
 	ast.WalkDeclarations(a, a.program.Declarations)
+
+	// TODO(thacuber2a03): design and return a
+	// format with more info if necessary
 	return len(a.Errors) == 0
 }
 
-func New(program *ast.Program) *Analyzer {
+func NewAnalyzer(program *ast.Program) *Analyzer {
 	return &Analyzer{program: program}
 }

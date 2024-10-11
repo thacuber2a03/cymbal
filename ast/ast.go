@@ -46,12 +46,14 @@ type Block struct {
 func (_ *Block) stmtNode() {}
 func (_ *Block) exprNode() {}
 
+// Represents a literal `<value> <port> DEO` sequence.
 type DEOStatement struct {
 	Port, Value Expression
 }
 
 func (_ *DEOStatement) stmtNode() {}
 
+// Represents a value. Usually output as `LIT2 <byte(value >> 8)> <byte(value)>`.
 type Literal struct {
 	Value int16
 }
