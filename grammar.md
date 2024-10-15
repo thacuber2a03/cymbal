@@ -12,10 +12,13 @@ program     -> declaration* EOF
 declaration -> mainDecl
 mainDecl    -> MAIN block
 
-statement   -> deoStmt
 block       -> LBRACE statement* RBRACE
-deoStmt     -> DEO expression COMMA expression
+statement   -> deo | block
+deo         -> DEO expression COMMA expression
 
-expression  -> literal
-literal     -> CHAR | INT
+expression  -> term
+term        -> factor ((PLUS | MINUS) factor)*
+factor      -> unary ((STAR | SLASH) unary)*
+unary       -> (BANG | MINUS) primary | primary
+primary     -> DEI primary | LPAREN expresion RPAREN | CHAR | INT
 ```
