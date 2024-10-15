@@ -70,6 +70,9 @@ func (cg *CodeGen) block(b *ast.Block) {
 	ast.WalkStatements(cg, b.Statements)
 }
 
+// Compiles the AST into a `[]byte`.
+// All references within the code are relative to the reset vector,
+// so all labels/jumps point to `<location> + 0x100`.
 func (cg *CodeGen) Compile() []byte {
 	ast.WalkDeclarations(cg, cg.program.Declarations)
 
