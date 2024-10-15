@@ -1,26 +1,30 @@
 package ast
 
 import (
-	// NOTE(thacuber2a03): might use later
-	// "github.com/thacuber2a03/cymbal/lexer"
+	"fmt"
+	"strings"
+
+	"github.com/thacuber2a03/cymbal/lexer"
 )
 
 type (
-	Node = interface {}
+	Node interface{}
 
-	Declaration = interface {
+	Declaration interface {
 		Node
 		declNode()
 	}
 
-	Statement = interface {
+	Statement interface {
 		Node
 		stmtNode()
+		fmt.Stringer
 	}
 
-	Expression = interface {
+	Expression interface {
 		Node
 		exprNode()
+		fmt.Stringer
 	}
 )
 
@@ -46,6 +50,20 @@ type Block struct {
 func (_ *Block) stmtNode() {}
 func (_ *Block) exprNode() {}
 
+func (b *Block) String() string {
+	var out strings.Builder
+
+	stmts := []string{}
+	for _, s:= range b.Statements {
+		stmts = append(stmts, s.String())
+	}
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(stmts, "; "))
+	out.WriteString(" }")
+	return out.String()
+}
+
 // Represents a literal `<value> <port> DEO` sequence.
 type DEOStatement struct {
 	Port, Value Expression
@@ -53,9 +71,35 @@ type DEOStatement struct {
 
 func (_ *DEOStatement) stmtNode() {}
 
-// Represents a value. Usually output as `LIT2 <byte(value >> 8)> <byte(value)>`.
+func (ds *DEOStatement) String() string {
+	var out strings.Builder
+	out.WriteString("deo ")
+	out.WriteString(ds.Value.String())
+	out.WriteString(", ")
+	out.WriteString(ds.Port.String())
+	return out.String()
+}
+
+// Represents a binary expression.
+type Binary struct {
+	Left, Right Expression
+	Operator    lexer.Token
+}
+
+func (_ *Binary) exprNode() {}
+
+func (b *Binary) String() string {
+	return fmt.Sprintf("(%s %s %s)",
+		b.Left, b.Operator.Lexeme, b.Right)
+}
+
+// Represents a value.
 type Literal struct {
 	Value int16
 }
 
 func (_ *Literal) exprNode() {}
+
+func (l *Literal) String() string {
+	return fmt.Sprintf("%v", l.Value)
+}

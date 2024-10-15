@@ -31,7 +31,6 @@ func (l *Lexer) peekChar() byte {
 func (l *Lexer) nextChar() byte {
 	ch := l.peekChar()
 	l.index++
-
 	if ch == '\n' {
 		l.line++
 	}
@@ -51,13 +50,14 @@ func isValidIdent(ch byte) bool {
 }
 
 var keywords = map[string]TokenType{
-	"fn":  TT_FN,
+	"fn":   TT_FN,
 	"main": TT_MAIN,
-	"deo": TT_DEO,
+	"deo":  TT_DEO,
 }
 
-func (l *Lexer) ident() Token {
+func (l *Lexer) ident(c byte) Token {
 	var id strings.Builder
+	id.WriteByte(c)
 
 	for !l.atEnd() && isValidIdent(l.peekChar()) ||
 		unicode.IsDigit(rune(l.peekChar())) {
@@ -89,8 +89,9 @@ var validBases = map[byte]struct {
 	},
 }
 
-func (l *Lexer) number() Token {
+func (l *Lexer) number(c byte) Token {
 	var num strings.Builder
+	num.WriteByte(c)
 
 	for !l.atEnd() && unicode.IsDigit(rune(l.peekChar())) {
 		num.WriteByte(l.nextChar())
@@ -119,9 +120,9 @@ func (l *Lexer) number() Token {
 	return l.token(TT_INT, num.String())
 }
 
-func (l *Lexer) charLit() Token {
+func (l *Lexer) charLit(c byte) Token {
 	var lit strings.Builder
-	lit.WriteByte(l.nextChar())
+	lit.WriteByte(c)
 	if l.atEnd() {
 		return l.error("unterminated character literal")
 	}
@@ -139,35 +140,61 @@ func (l *Lexer) charLit() Token {
 	return l.token(TT_CHAR, lit.String())
 }
 
-func (l *Lexer) Next() Token {
-	for unicode.IsSpace(rune(l.peekChar())) {
-		l.nextChar()
+func (l *Lexer) skipWhitespace() {
+out:
+	for {
+		switch l.peekChar() {
+		// comment
+		case '#':
+			for !l.atEnd() && l.peekChar() != '\n' {
+				l.nextChar()
+			}
+
+		case ' ', '\t', '\n', '\r', '\v', '\f':
+			l.nextChar()
+
+		default:
+			break out
+		}
 	}
+}
+
+func (l *Lexer) Next() Token {
+	l.skipWhitespace()
 
 	if l.atEnd() {
 		return l.token(TT_EOF, "<eof>")
 	}
 
-	c := l.peekChar()
+	c := l.nextChar()
 
 	switch c {
 	case '{':
-		l.nextChar()
 		return l.token(TT_LBRACE, "{")
 	case '}':
-		l.nextChar()
 		return l.token(TT_RBRACE, "}")
+	case '(':
+		return l.token(TT_LPAREN, "(")
+	case ')':
+		return l.token(TT_RPAREN, ")")
 	case ',':
-		l.nextChar()
 		return l.token(TT_COMMA, ",")
+	case '+':
+		return l.token(TT_PLUS, "+")
+	case '-':
+		return l.token(TT_MINUS, "-")
+	case '*':
+		return l.token(TT_STAR, "*")
+	case '/':
+		return l.token(TT_SLASH, "/")
 	case '\'':
-		return l.charLit()
+		return l.charLit(c)
 	}
 
 	if isValidIdent(c) {
-		return l.ident()
+		return l.ident(c)
 	} else if unicode.IsDigit(rune(c)) {
-		return l.number()
+		return l.number(c)
 	}
 
 	return l.error("unrecognized character '%q'", c)

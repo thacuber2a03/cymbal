@@ -1,16 +1,18 @@
 package lexer_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/thacuber2a03/cymbal/lexer"
 )
 
 func TestBasicLexing(t *testing.T) {
 	source := `main {
-	deo 0x18, 'a'
-}`
+	deo 'a', 0x18
+}
++-*/()
+# this is a comment`
 
 	expected := []struct {
 		tokType lexer.TokenType
@@ -20,11 +22,17 @@ func TestBasicLexing(t *testing.T) {
 		{lexer.TT_MAIN, "main", 1},
 		{lexer.TT_LBRACE, "{", 1},
 		{lexer.TT_DEO, "deo", 2},
-		{lexer.TT_INT, "0x18", 2},
-		{lexer.TT_COMMA, ",", 2},
 		{lexer.TT_CHAR, "'a'", 2},
+		{lexer.TT_COMMA, ",", 2},
+		{lexer.TT_INT, "0x18", 2},
 		{lexer.TT_RBRACE, "}", 3},
-		{lexer.TT_EOF, "<eof>", 3},
+		{lexer.TT_PLUS, "+", 4},
+		{lexer.TT_MINUS, "-", 4},
+		{lexer.TT_STAR, "*", 4},
+		{lexer.TT_SLASH, "/", 4},
+		{lexer.TT_LPAREN, "(", 4},
+		{lexer.TT_RPAREN, ")", 4},
+		{lexer.TT_EOF, "<eof>", 5},
 	}
 
 	l := lexer.New(source)

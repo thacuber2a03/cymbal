@@ -10,20 +10,26 @@ func _() {
 	var x [1]struct{}
 	_ = x[TT_EOF-0]
 	_ = x[TT_ERROR-1]
-	_ = x[TT_IDENT-2]
-	_ = x[TT_INT-3]
-	_ = x[TT_CHAR-4]
-	_ = x[TT_LBRACE-5]
+	_ = x[TT_LBRACE-2]
+	_ = x[TT_RBRACE-3]
+	_ = x[TT_LPAREN-4]
+	_ = x[TT_RPAREN-5]
 	_ = x[TT_COMMA-6]
-	_ = x[TT_RBRACE-7]
-	_ = x[TT_FN-8]
-	_ = x[TT_MAIN-9]
-	_ = x[TT_DEO-10]
+	_ = x[TT_PLUS-7]
+	_ = x[TT_MINUS-8]
+	_ = x[TT_STAR-9]
+	_ = x[TT_SLASH-10]
+	_ = x[TT_IDENT-11]
+	_ = x[TT_INT-12]
+	_ = x[TT_CHAR-13]
+	_ = x[TT_FN-14]
+	_ = x[TT_MAIN-15]
+	_ = x[TT_DEO-16]
 }
 
-const _TokenType_name = "EOFERRORIDENTINTCHARLBRACECOMMARBRACEFNMAINDEO"
+const _TokenType_name = "EOFERRORLBRACERBRACELPARENRPARENCOMMAPLUSMINUSSTARSLASHIDENTINTCHARFNMAINDEO"
 
-var _TokenType_index = [...]uint8{0, 3, 8, 13, 16, 20, 26, 31, 37, 39, 43, 46}
+var _TokenType_index = [...]uint8{0, 3, 8, 14, 20, 26, 32, 37, 41, 46, 50, 55, 60, 63, 67, 69, 73, 76}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {
